@@ -135,15 +135,7 @@ render_kpi_row([
         "accent": "gold",
         "spark": [prv_pct, cur_pct],
     },
-    {
-        "icon": "account_balance",
-        "value": str(len(ALL_BOARDS)),
-        "label": f"BISE Boards ({selected_year})",
-        "delta": f"{len(PROVINCE_BOARD_MAP)} provinces",
-        "accent": "blue",
-        "spark": [prv["failed"], cur["failed"]],
-        "delta_positive": True,
-    },
+   
 ])
 
 # ---------------------------------------------------------------------------

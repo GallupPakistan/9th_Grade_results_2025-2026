@@ -23,6 +23,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from styles.theme import COLORS, BOARD_COLOR_SEQUENCE
 from config.settings import ALL_BOARDS
+from charts.label_utils import assign_scatter_label_positions, apply_positions
 
 # Gender color-coding — identical to charts/overview_charts.py so the
 # same gender renders in the same color everywhere.
@@ -273,7 +274,8 @@ def chart_gender_appeared(gender_df: pd.DataFrame, years: list[int]) -> go.Figur
 def chart_gender_scatter(gender_df: pd.DataFrame, years: list[int]) -> go.Figure:
     """Scatter: Male Pass % (x) vs Female Pass % (y), one labelled point
     per board, with a dashed 45° parity line — above the line = Female
-    ahead, below = Male ahead. 'Both' colors the points by year."""
+    ahead, below = Male ahead. 'Both' colors the points by year. Labels
+    are placed by charts/label_utils so clustered boards never collide."""
     recs = []
     for year in years:
         p = prepare_gender_pivot(gender_df, year)
@@ -283,13 +285,20 @@ def chart_gender_scatter(gender_df: pd.DataFrame, years: list[int]) -> go.Figure
                          "Appeared": r["Appeared Total"]})
     d = pd.DataFrame(recs)
 
+    x_range = (0.2, 1.02)
+    y_range = (0.2, 1.02)
+
     fig = px.scatter(
         d, x="Male", y="Female", color="Year" if len(years) > 1 else None,
         text="Board", custom_data=["Appeared"],
         color_discrete_map=_YEAR_COLORS,
     )
+    pos = assign_scatter_label_positions(
+        d["Board"], d["Male"], d["Female"], x_range, y_range,
+    )
+    apply_positions(fig, pos)
     fig.update_traces(
-        textposition="top center", textfont_size=9, cliponaxis=False,
+        textfont_size=9, cliponaxis=False,
         marker=dict(size=11, opacity=0.85),
         hovertemplate="%{text}<br>Male %{x:.1%} · Female %{y:.1%}"
                       "<br>Appeared %{customdata[0]:,}<extra></extra>",
@@ -299,8 +308,8 @@ def chart_gender_scatter(gender_df: pd.DataFrame, years: list[int]) -> go.Figure
         line=dict(dash="dash", color=COLORS["neutral"]),
         name="Parity (M = F)", hoverinfo="skip",
     ))
-    fig.update_xaxes(tickformat=".0%", range=[0.2, 1.02])
-    fig.update_yaxes(tickformat=".0%", range=[0.2, 1.02])
+    fig.update_xaxes(tickformat=".0%", range=list(x_range))
+    fig.update_yaxes(tickformat=".0%", range=list(y_range))
     return _base_layout(fig, legend_title="Year" if len(years) > 1 else "", height=460)
 
 

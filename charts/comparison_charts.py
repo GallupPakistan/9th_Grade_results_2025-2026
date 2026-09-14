@@ -30,6 +30,7 @@ import plotly.graph_objects as go
 from config.settings import ALL_BOARDS
 from styles.theme import COLORS, BOARD_COLOR_SEQUENCE
 from data.availability import PROVINCE_BOARD_MAP
+from charts.label_utils import assign_scatter_label_positions, apply_positions
 
 
 # ---------------------------------------------------------------------------
@@ -217,16 +218,29 @@ def chart_passed_vs_failed(comp: pd.DataFrame, year: int) -> go.Figure:
 def chart_size_vs_performance(comp: pd.DataFrame, year: int) -> go.Figure:
     """Scatter: x = Appeared (board size), y = Pass %, one labelled point
     per board for the selected year, colored by province. Answers 'do the
-    biggest boards perform better?' at a glance."""
+    biggest boards perform better?' at a glance. Labels are placed by
+    charts/label_utils so crowded boards never collide."""
     d = comp.dropna(subset=[f"Pass % {year}"]).copy()
     d["Province"] = d["Board"].map(_province_of)
+
+    # Explicit ranges — the label-placement math in label_utils must
+    # match the axes Plotly actually renders.
+    x_max = float(d[f"Appeared {year}"].max())
+    y_min = float(d[f"Pass % {year}"].min())
+    y_max = float(d[f"Pass % {year}"].max())
+    x_range = (0.0, x_max * 1.12)
+    y_range = (max(0.0, y_min - 0.08), min(1.0, y_max + 0.08))
 
     fig = px.scatter(
         d, x=f"Appeared {year}", y=f"Pass % {year}", color="Province",
         hover_name="Board", text="Board",
         color_discrete_sequence=BOARD_COLOR_SEQUENCE,
     )
-    fig.update_traces(textposition="top center", textfont_size=9, cliponaxis=False)
-    fig.update_yaxes(tickformat=".0%")
-    fig.update_xaxes(tickformat=".2s")
+    pos = assign_scatter_label_positions(
+        d["Board"], d[f"Appeared {year}"], d[f"Pass % {year}"], x_range, y_range,
+    )
+    apply_positions(fig, pos)
+    fig.update_traces(textfont_size=9, cliponaxis=False)
+    fig.update_yaxes(tickformat=".0%", range=list(y_range))
+    fig.update_xaxes(tickformat=".2s", range=list(x_range))
     return _base_layout(fig, legend_title="Province")

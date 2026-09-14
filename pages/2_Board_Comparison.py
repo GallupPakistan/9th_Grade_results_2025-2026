@@ -171,14 +171,7 @@ render_kpi_row([
         "delta_positive": True,
         "accent": "green",
     },
-    {
-        "icon": "account_balance",
-        "value": str(len(comp)),
-        "label": f"Boards Shown ({selected_year})",
-        "delta": f"of {len(ALL_BOARDS)} total",
-        "delta_positive": True,
-        "accent": "blue",
-    },
+   
 ])
 
 # ---------------------------------------------------------------------------

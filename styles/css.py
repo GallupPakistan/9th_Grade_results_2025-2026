@@ -314,7 +314,7 @@ def _kpi_card_css() -> str:
         gap: 0.8rem;
         overflow: hidden;
         height: 100%;
-        min-height: 124px;
+        min-height: 100px;
     }}
     /* Equal-height KPI row: stretch each column's vertical block so every
        card in the row matches the tallest one. Scoped to direct markdown
@@ -361,12 +361,14 @@ def _kpi_card_css() -> str:
     }}
     .kpi-card-body {{ min-width: 0; }}
     .kpi-card-value {{
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 800;
         color: {COLORS['text_on_light']};
-        line-height: 1.15;
+        line-height: 1.2;
         letter-spacing: -0.01em;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }}
     .kpi-card-label {{
         font-size: 0.66rem;
@@ -555,8 +557,23 @@ def _filter_bar_css() -> str:
         letter-spacing: 0.04em;
         white-space: nowrap;
     }}
-    .filter-bar div[data-testid="stPills"] label {{
+        /* Individual pill buttons — rounded capsules */
+    .filter-bar div[data-testid="stButtonGroup"] button {{
         border-radius: 999px !important;
+    }}
+        /* Selected pills — filled accent background, white text */
+    .filter-bar div[data-testid="stButtonGroup"] button[aria-pressed="true"],
+    .filter-bar div[data-testid="stButtonGroup"] [data-selected="true"] {{
+        background-color: {COLORS['accent']} !important;
+        color: #FFFFFF !important;
+        border: 1px solid {COLORS['accent']} !important;
+    }}
+    /* Unselected pills — transparent, muted outline. Note: data-selected is
+       only rendered when true, so :not() is used as the catch-all fallback. */
+    .filter-bar div[data-testid="stButtonGroup"] button:not([aria-pressed="true"]):not([data-selected="true"]) {{
+        background-color: transparent !important;
+        color: {COLORS['text_on_light_muted']} !important;
+        border: 1px solid {COLORS['card_border_light']} !important;
     }}
     </style>
     """
@@ -655,11 +672,11 @@ def _page_header_css() -> str:
         letter-spacing: -0.01em;
         margin: 0.2rem 0 1.2rem 0;
     }}
-    /* Right-align the year pills inside the header's last column. */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child div[data-testid="stPills"] {{
+        /* Right-align the year pills inside the header's last column. */
+    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child div[data-testid="stButtonGroup"] {{
         justify-content: flex-end;
     }}
-    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child div[data-testid="stPills"] label {{
+    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child div[data-testid="stButtonGroup"] button {{
         border-radius: 999px !important;
     }}
     </style>
